@@ -1202,7 +1202,7 @@ Library Corner
 ~~~~~~~~~~~~~~
 
 Besides depending on slew and load, cell delays vary with process, voltage and temperature (a.k.a *PVT*)
-changes. We will discuss later (`TBD`_) on how this dependency looks like. The key point here is that every
+changes. We will discuss later (`PVT Variations`_) on how this dependency looks like. The key point here is that every
 cell library needs to be characterized over different PVT combinations and delivered as a group of ``*.lib``
 files. The choice of PVT combinations come from typical operating conditions for the library cells (e.g.
 nominal voltage plus/minus 10%, industrial temperature range of -40 C to 125 C) and process variance (i.e.
@@ -1268,7 +1268,7 @@ Steps 3 to 5 will be practiced  during exercises. Steps 1 and 2 in PrimeTime loo
    techonology library, then loading the new ones::
    
        # unload the design
-       remove_desing [current_design]
+       remove_design [current_design]
        
        # unload the librarym, where <libname> is the library name, usually
        # the base name of the library file
@@ -1277,15 +1277,15 @@ Steps 3 to 5 will be practiced  during exercises. Steps 1 and 2 in PrimeTime loo
 PT Exercise 1: Simple FF-to-FF Path
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*Objective: Show that with no clock definition ``report_timing`` has nothing to report. Learn how to define
+*Objective: Show that with no clock definition* ``report_timing`` *has nothing to report. Learn how to define
 a clock and report analysis results.*
 
 *Tasks:*
 
-- *Set up PT session using ``circ01.v`` and ``sample_lib1.db``.*
-- *Use ``report_timing`` to see results without any user constraints.*
-- *Define clock and a clock period constraint with ``create_clock``.*
-- *Report results of setup and hold timing checks. Compare with results comuted earlier.*
+- *Set up PT session using* ``circ01.v`` *and* ``sample_lib1.db``.
+- *Use* ``report_timing`` *to see results without any user constraints.*
+- *Define clock and a clock period constraint with* ``create_clock``.
+- *Report results of setup and hold timing checks. Compare with results computed in* `Exercise 1: Simple FF-to-FF Path`_.
 
 Here is how the exercise may proceed:
 
@@ -1299,8 +1299,8 @@ Here is how the exercise may proceed:
        pt_shell> set link_path sample_lib1.db
        pt_shell> read_verilog circ01.v
        pt_shell> link
-       Loading verilog file '/sim/fip/fg6b3h/github.com/brabect1/gist_digi_training/circ01.v'
-       Loading db file '/sim/fip/fg6b3h/github.com/brabect1/gist_digi_training/sample_lib1.db'
+       Loading verilog file '.../circ01.v'
+       Loading db file '.../sample_lib1.db'
        Linking design circ01...
        Information: 7 (77.78%) library cells are unused in library sample_lib1..... (LNK-045)
        Information: total 7 library cells are unused (LNK-046)
@@ -1316,11 +1316,11 @@ Here is how the exercise may proceed:
        pt_shell> read_verilog circ01.v
        pt_shell> link
        Beginning read_lib...
-       Using exec: /cad/synopsys/library_compiler/N-2017.12/linux64/lc/bin/lc_shell_exec
-       Reading '/sim/fip/fg6b3h/github.com/brabect1/gist_digi_training/sample_lib1.lib' ...
+       Using exec: /library_compiler/N-2017.12/linux64/lc/bin/lc_shell_exec
+       Reading '.../sample_lib1.lib' ...
        Technology library 'sample_lib1' read successfully
-       Loading verilog file '/sim/fip/fg6b3h/github.com/brabect1/gist_digi_training/circ01.v'
-       Loading db file '/sim/fip/fg6b3h/github.com/brabect1/gist_digi_training/sample_lib1.lib'
+       Loading verilog file '.../circ01.v'
+       Loading db file '.../sample_lib1.lib'
        Loading db file '/tmp/_pt1r2wdkga/1.db'
        Linking design circ01...
        Design 'circ01' was successfully linked.
@@ -1452,14 +1452,274 @@ Here is how the exercise may proceed:
 PT Exercise 2: Effect of Negedge Clocking
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+*Objective: Show timing reports for a circuit with different edge flops.*
+
+*Tasks:*
+
+- *Set up PT session using* ``circ02.v`` *and* ``sample_lib1.db``.
+- *Define clock and a clock period constraint.*
+- *Report results of setup and hold timing checks. Compare with results computed in* `Exercise 2: Effect of Negedge Clocking`_.
+
+There is nothing new to the preceding PT exercise. The tool reports shall look
+like below (yielding setup and hold slack 4.3 and 14.7, respectively)::
+
+    ****************************************                                 ****************************************
+    Report : timing                                                          Report : timing
+    	-path_type full                                                      	-path_type full
+    	-delay_type max                                                      	-delay_type min
+    	-max_paths 1                                                         	-max_paths 1
+    	-sort_by slack                                                       	-sort_by slack
+    Design : circ02                                                          Design : circ02
+    Version: O-2018.06-SP4                                                   Version: O-2018.06-SP4
+    Date   : Mon Jul 29 19:17:39 2019                                        Date   : Mon Jul 29 19:17:48 2019
+    ****************************************                                 ****************************************
+      Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)         Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)
+      Endpoint: FF2 (falling edge-triggered flip-flop clocked by CLK)          Endpoint: FF2 (falling edge-triggered flip-flop clocked by CLK)
+      Path Group: CLK                                                          Path Group: CLK
+      Path Type: max                                                           Path Type: min
+                                                                             
+      Point                                    Incr       Path                 Point                                    Incr       Path
+      ---------------------------------------------------------------          ---------------------------------------------------------------
+      clock CLK (rise edge)                    0.00       0.00                 clock CLK (rise edge)                   20.00      20.00
+      clock network delay (ideal)              0.00       0.00                 clock network delay (ideal)              0.00      20.00
+      FF1/CK (dffrx1)                          0.00       0.00 r               FF1/CK (dffrx1)                          0.00      20.00 r
+      FF1/Q (dffrx1)                           3.00       3.00 f               FF1/Q (dffrx1)                           3.00      23.00 f
+      G1/Y (invx1)                             2.00       5.00 r               G1/Y (invx1)                             2.00      25.00 r
+      FF2/D (dffnrx1)                          0.00       5.00 r               FF2/D (dffnrx1)                          0.00      25.00 r
+      data arrival time                                   5.00                 data arrival time                                  25.00
+                                                                             
+      clock CLK (fall edge)                   10.00      10.00                 clock CLK (fall edge)                   10.00      10.00
+      clock network delay (ideal)              0.00      10.00                 clock network delay (ideal)              0.00      10.00
+      clock reconvergence pessimism            0.00      10.00                 clock reconvergence pessimism            0.00      10.00
+      FF2/CKN (dffnrx1)                                  10.00 f               FF2/CKN (dffnrx1)                                  10.00 f
+      library setup time                      -0.70       9.30                 library hold time                        0.30      10.30
+      data required time                                  9.30                 data required time                                 10.30
+      ---------------------------------------------------------------          ---------------------------------------------------------------
+      data required time                                  9.30                 data required time                                 10.30
+      data arrival time                                  -5.00                 data arrival time                                 -25.00
+      ---------------------------------------------------------------          ---------------------------------------------------------------
+      slack (MET)                                         4.30                 slack (MET)                                        14.70  
+    
+
+
 PT Exercise 3: Simple FF-to-FF Parh with Clock Tree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Objective: Show timing reports for a circuit with a clock tree.*
+
+*Tasks:*
+
+- *Set up PT session using* ``circ03.v`` *and* ``sample_lib1.db``.
+- *Define clock and a clock period constraint.*
+- *Report results of setup and hold timing checks. Compare with results computed in* `Exercise 3: Simple FF-to-FF Parh with Clock Tree`_.
+
+The analysis procedure is as in the preceding examples. However, we do extend
+``report_timing`` options to get a complete clock path listing.
 
 ::
 
        # Unless specified otherwise, timing reports condense clock paths to a single
        # value. Use `-path_type full_clock_expanded` to get the complete path listing.
        pt_shell> report_timing -path_type full_clock_expanded
+
+The full setup/hold listing then looks like follows::
+
+    ****************************************                               ****************************************
+    Report : timing                                                        Report : timing
+    	-path_type full_clock_expanded                                     	-path_type full_clock_expanded
+    	-delay_type max                                                    	-delay_type min
+    	-max_paths 1                                                       	-max_paths 1
+    	-sort_by slack                                                     	-sort_by slack
+    Design : circ03                                                        Design : circ03
+    Version: O-2018.06-SP4                                                 Version: O-2018.06-SP4
+    Date   : Mon Jul 29 19:16:43 2019                                      Date   : Mon Jul 29 19:16:53 2019
+    ****************************************                               ****************************************
+      Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)       Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)
+      Endpoint: FF2 (rising edge-triggered flip-flop clocked by CLK)         Endpoint: FF2 (rising edge-triggered flip-flop clocked by CLK)
+      Last common pin: clk                                                   Last common pin: clk
+      Path Group: CLK                                                        Path Group: CLK
+      Path Type: max                                                         Path Type: min
+                                                                           
+      Point                                    Incr       Path               Point                                    Incr       Path
+      ---------------------------------------------------------------        ---------------------------------------------------------------
+      clock CLK (rise edge)                    0.00       0.00               clock CLK (rise edge)                    0.00       0.00
+      clock source latency                     0.00       0.00               clock source latency                     0.00       0.00
+      clk (in)                                 0.00       0.00 r             clk (in)                                 0.00       0.00 r
+      B1/Y (bufx4)                             1.00       1.00 r             B1/Y (bufx4)                             1.00       1.00 r
+      B2/Y (bufx1)                             2.00       3.00 r             B2/Y (bufx1)                             2.00       3.00 r
+      FF1/CK (dffrx1)                          0.00       3.00 r             FF1/CK (dffrx1)                          0.00       3.00 r
+      FF1/Q (dffrx1)                           3.00       6.00 r             FF1/Q (dffrx1)                           3.00       6.00 r
+      G1/Y (nand2x1)                           2.00       8.00 f             G1/Y (nand2x1)                           2.00       8.00 f
+      G2/Y (invx1)                             2.00      10.00 r             G2/Y (invx1)                             2.00      10.00 r
+      FF2/D (dffrx1)                           0.00      10.00 r             FF2/D (dffrx1)                           0.00      10.00 r
+      data arrival time                                  10.00               data arrival time                                  10.00
+                                                                           
+      clock CLK (rise edge)                    7.00       7.00               clock CLK (rise edge)                    0.00       0.00
+      clock source latency                     0.00       7.00               clock source latency                     0.00       0.00
+      clk (in)                                 0.00       7.00 r             clk (in)                                 0.00       0.00 r
+      B1/Y (bufx4)                             1.00       8.00 r             B1/Y (bufx4)                             1.00       1.00 r
+      B3/Y (bufx1)                             2.00      10.00 r             B3/Y (bufx1)                             2.00       3.00 r
+      FF2/CK (dffrx1)                          0.00      10.00 r             FF2/CK (dffrx1)                          0.00       3.00 r
+      clock reconvergence pessimism            0.00      10.00               clock reconvergence pessimism            0.00       3.00
+      library setup time                      -0.70       9.30               library hold time                        0.30       3.30
+      data required time                                  9.30               data required time                                  3.30
+      ---------------------------------------------------------------        ---------------------------------------------------------------
+      data required time                                  9.30               data required time                                  3.30
+      data arrival time                                 -10.00               data arrival time                                 -10.00
+      ---------------------------------------------------------------        ---------------------------------------------------------------
+      slack (VIOLATED)                                   -0.70               slack (MET)                                         6.70  
+
+
+PT Exercise 4: Parallel FF-to-FF Paths
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Objective: Practice timing reports with* ``-from``, ``-through`` *and* ``-to`` *options.*
+
+*Tasks:*
+
+- *Set up PT session using* ``circ04.v`` *and* ``sample_lib1.db``.
+- *Define clock and a clock period constraint.*
+- *Report timing analysis results for the following paths:*
+  - *from FF1*
+  - *from FF1/CK to FF2/D*
+  - *to FF2/Q*
+  - *through G2*
+
+Again, there should be nothing surprising with the standard setup and hold
+analysis procedure; the results would come out as in `Exercise 4: Parallel FF-to-FF Paths`_.
+
+Existence of parallel paths between FF1 and FF2 lets you see the effect of
+specifying the timing path more precisely. The commands to exercise would
+be as follows:
+
+1. Specifying only the startpoint will yield the same results as if it were
+   omitted. The reason is that there is a single timing path in the circuit
+   and so there is nothing else to report.
+
+   ::
+
+       # Specifying a path by a startpoint
+       pt_shell> report_timing -from FF1
+       ...
+
+2. Specifying both the startpoint and the endpoint. This time we specify the points
+   up to a an instance pin. Again, you will get the same report as previously as
+   we identify the only path in the design.
+
+   ::
+
+       # Specifying a path by both startpoint and endpoint
+       pt_shell> report_timing -from FF1/CK -to FF2/D
+       ...
+
+3. Specifying an enpoint only would again yield the only timing path in the
+   design, should the enpoint be specified correctly. Notice the assignment
+   asks for using ``FF2/Q`` as the endpoint, but a flop output cannot be an
+   endpoint of a timing path. So you should see the STA tool complain:: 
+
+       # Specifying a wrong endpoint
+       pt_shell> report_timing -to FF2/Q
+       
+       TODO
+
+4. Using the ``-through`` point lets you choose the signal path for analysis
+   other than the worst case one. In `Exercise 4: Parallel FF-to-FF Paths`_
+   we identified that the path through G1 yields the worst setup timing.
+   Hence changing the *through* point to G2 will report greater slack.
+
+   ::
+
+       # Specifying a path through a particular gate
+       pt_shell> report_timing -through G2
+       
+       TODO
+
+
+PT Exercise 5: Small Circuit Analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Objective: Practice timing timing analysis of a more complex circuit.*
+
+*Tasks:*
+
+- *Unless provided with a netlist, create one based on the circuit from* `Exercise 5: Small Circuit Analysis`_.
+- *Set up PT session using* ``sample_lib1.db``.
+- *Define clock and a clock period constraint.*
+- *Identify paths with the worst setup and hold slacks.*
+- *Identify worst slacks for all timing paths.*
+
+The first part is easy. The paths with the worst setup and hold slacks are reported
+by default ``report_timing -delay_type max`` and ``report_timing -delay_type min``.
+
+To report the other paths we need to use other ``report_timing`` options. Of particular
+interest are these two:
+
+- ``-nworst N``: Reports up to N worst paths per endpoint. That is, if there were
+  two parallel paths such as in `Exercise 4: Parallel FF-to-FF Paths`_, using ``-nworst 2``
+  would report both paths.
+
+  This setting defaults to 1.
+
+- ``-maxpaths M``:  Reports up to M number of paths. As the paths are normally sorted
+  by slack, this would report M worst paths.
+
+  This setting defaults to 1.
+
+  The ``maxpath`` has one gotcha. Unless overriden, it sets the ``-slack_lesser_than``
+  to 0, meaning that only violating paths get reported by default. In our examples
+  you thus need to use some large enough slack limit, e.g. ``-slack_lesser_than 100``.
+
+The two options, ``nworst`` and ``maxpaths`` are often combined together. In cases
+where you care only for one of many paths to an endpoint, you would use
+``-max_paths N --nworst 1``. Try it out to collect the worst slacks in our example.
+
+There is one more improvement we can do. We care only for slacks, not for all the
+details of the paths. We can use the ``-path_type summary`` option to get a less
+verbose report::
+
+    pt_shell> report_timing -slack_lesser_than 100 -nworst 1 -max_paths 10 -path_type summary
+    
+    TODO
+
+.. TBD report_constraint -path_type slack_only
+
+PT Exercise 6: Simple Path with Multiple Clocks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Objective: Show more complex clock definition.*
+
+*Tasks:*
+
+- *Set up PT session using* ``circ06.v`` *and* ``sample_lib1.db``.
+- *Define clocks and report slacks for setup and hold.*
+
+To complete the exercise, you need to define the second clock with a proper
+phase shift. For that there is the ``-waveform`` option to the ``create_clock``
+command. You would use the same option when you needed to define other than
+1:1 duty cycle.
+
+::
+
+    # Define a phase shifted clock waveform. The `-waveform {...}` takes
+    # a list of times of rise and fall edges. The first number is always
+    # the rise edge.
+    pt_shell> create_clock -name CLKB -period 15 -waveform {7.5 15} clkb
+    ...
+
+
+PT Exercise 7: Simple Path with Rise/Fall Delays
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Objective: Practice analysis with transition-dependent timing.*
+
+*Tasks:*
+
+- *Set up PT session using* ``circ07.v`` *and* **sample_lib2.db**.
+- *Define clocks and report slacks for setup and hold.*
+- *Report timing having control over the startpoint transition type:*
+  - ``report_timing -rise_from FF1``
+  - ``report_timing -fall_from FF1``
+
 
 STA Intermediate Topics
 .......................
