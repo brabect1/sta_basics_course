@@ -1580,6 +1580,7 @@ PT Exercise 4: Parallel FF-to-FF Paths
 - *Set up PT session using* ``circ04.v`` *and* ``sample_lib1.db``.
 - *Define clock and a clock period constraint.*
 - *Report timing analysis results for the following paths:*
+
   - *from FF1*
   - *from FF1/CK to FF2/D*
   - *to FF2/Q*
@@ -1619,8 +1620,19 @@ be as follows:
 
        # Specifying a wrong endpoint
        pt_shell> report_timing -to FF2/Q
+       ****************************************
+       Report : timing
+       	-path_type full
+       	-delay_type max
+       	-max_paths 1
+       	-sort_by slack
+       Design : circ04
+       Version: O-2018.06-SP4
+       Date   : Sat Aug 24 18:26:49 2019
+       ****************************************
        
-       TODO
+       Warning: There is 1 invalid end point for constrained paths. (UITE-416)
+       No constrained paths.
 
 4. Using the ``-through`` point lets you choose the signal path for analysis
    other than the worst case one. In `Exercise 4: Parallel FF-to-FF Paths`_
@@ -1631,8 +1643,45 @@ be as follows:
 
        # Specifying a path through a particular gate
        pt_shell> report_timing -through G2
+       ****************************************
+       Report : timing
+       	-path_type full
+       	-delay_type max
+       	-max_paths 1
+       	-sort_by slack
+       Design : circ04
+       Version: O-2018.06-SP4
+       Date   : Sat Aug 24 18:27:12 2019
+       ****************************************
+         Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)
+         Endpoint: FF2 (rising edge-triggered flip-flop clocked by CLK)
+         Last common pin: clk
+         Path Group: CLK
+         Path Type: max
        
-       TODO
+         Point                                    Incr       Path
+         ---------------------------------------------------------------
+         clock CLK (rise edge)                    0.00       0.00
+         clock network delay (propagated)         0.00       0.00
+         FF1/CK (dffrx1)                          0.00       0.00 r
+         FF1/Q (dffrx1)                           3.00       3.00 r
+         G2/A (invx4) <-                          0.00       3.00 r
+         G2/Y (invx4) <-                          1.00       4.00 f
+         G3/Y (nand2x1)                           2.00       6.00 r
+         FF2/D (dffrx1)                           0.00       6.00 r
+         data arrival time                                   6.00
+       
+         clock CLK (rise edge)                    2.00       2.00
+         clock network delay (propagated)         6.00       8.00
+         clock reconvergence pessimism            0.00       8.00
+         FF2/CK (dffrx1)                                     8.00 r
+         library setup time                      -0.70       7.30
+         data required time                                  7.30
+         ---------------------------------------------------------------
+         data required time                                  7.30
+         data arrival time                                  -6.00
+         ---------------------------------------------------------------
+         slack (MET)                                         1.30
 
 
 PT Exercise 5: Small Circuit Analysis
@@ -1655,8 +1704,11 @@ To report the other paths we need to use other ``report_timing`` options. Of par
 interest are these two:
 
 - ``-nworst N``: Reports up to N worst paths per endpoint. That is, if there were
-  two parallel paths such as in `Exercise 4: Parallel FF-to-FF Paths`_, using ``-nworst 2``
-  would report both paths.
+  more parallel paths such as in `Exercise 4: Parallel FF-to-FF Paths`_, using ``-nworst``
+  would report those paths. However, if you tried that on Exercise 4, you would
+  need to use N of three or more. The reason is that, in this case, the worst path
+  covers both signal rise and fall transitions and so the second paths gets
+  reported on the third place.
 
   This setting defaults to 1.
 
@@ -1671,17 +1723,38 @@ interest are these two:
 
 The two options, ``nworst`` and ``maxpaths`` are often combined together. In cases
 where you care only for one of many paths to an endpoint, you would use
-``-max_paths N --nworst 1``. Try it out to collect the worst slacks in our example.
+``-max_paths N -nworst 1``. Try it out to collect the worst slacks in our example.
 
 There is one more improvement we can do. We care only for slacks, not for all the
 details of the paths. We can use the ``-path_type summary`` option to get a less
 verbose report::
 
-    pt_shell> report_timing -slack_lesser_than 100 -nworst 1 -max_paths 10 -path_type summary
-    
-    TODO
+    pt_shell> report_timing -slack_lesser_than 100 -nworst 4 -max_paths 10 -path_type summary
+        
+    ****************************************              ****************************************
+    Report : timing                                       Report : timing
+    	-path_type summary                                	-path_type summary
+    	-delay_type max                                   	-delay_type min
+    	-nworst 4                                         	-nworst 4
+    	-slack_lesser_than 100.00                         	-slack_lesser_than 100.00
+    	-max_paths 100                                    	-max_paths 100
+    	-sort_by slack                                    	-sort_by slack
+    Design : circ05                                       Design : circ05
+    Version: O-2018.06-SP4                                Version: O-2018.06-SP4
+    Date   : Sat Aug 24 18:43:29 2019                     Date   : Sat Aug 24 18:43:37 2019
+    ****************************************              ****************************************
+                                                          
+    Startpoint            Endpoint             Slack      Startpoint            Endpoint             Slack
+    -------------------------------------------------     --------------------------------------------------
+    FF2/CK (dffrx1)       FF3/D (dffrx1)       2.30       FF1/CK (dffrx1)       FF4/D (dffrx1)       1.70
+    FF2/CK (dffrx1)       FF3/D (dffrx1)       2.30       FF1/CK (dffrx1)       FF4/D (dffrx1)       1.70
+    FF3/CK (dffrx1)       FF4/D (dffrx1)       6.30       FF3/CK (dffrx1)       FF4/D (dffrx1)       2.70
+    FF3/CK (dffrx1)       FF4/D (dffrx1)       6.30       FF3/CK (dffrx1)       FF4/D (dffrx1)       2.70
+    FF1/CK (dffrx1)       FF3/D (dffrx1)       6.30       FF1/CK (dffrx1)       FF3/D (dffrx1)       2.70
+    FF1/CK (dffrx1)       FF3/D (dffrx1)       6.30       FF1/CK (dffrx1)       FF3/D (dffrx1)       2.70
+    FF1/CK (dffrx1)       FF4/D (dffrx1)       7.30       FF2/CK (dffrx1)       FF3/D (dffrx1)       6.70
+    FF1/CK (dffrx1)       FF4/D (dffrx1)       7.30       FF2/CK (dffrx1)       FF3/D (dffrx1)       6.70  
 
-.. TBD report_constraint -path_type slack_only
 
 PT Exercise 6: Simple Path with Multiple Clocks
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1714,11 +1787,59 @@ PT Exercise 7: Simple Path with Rise/Fall Delays
 
 *Tasks:*
 
-- *Set up PT session using* ``circ07.v`` *and* **sample_lib2.db**.
+- *Set up PT session using* **circ03.v** *and* **sample_lib2.db**.
 - *Define clocks and report slacks for setup and hold.*
 - *Report timing having control over the startpoint transition type:*
-  - ``report_timing -rise_from FF1``
-  - ``report_timing -fall_from FF1``
+  
+  - ``report_timing -fall_from FF1/Q``
+  - ``report_timing -rise_from FF1/Q``
+
+The following reports contrast the fall and rise reports for hold checks::
+
+    ****************************************                               ****************************************
+    Report : timing                                                        Report : timing
+    	-path_type full_clock_expanded                                     	-path_type full_clock_expanded
+    	-delay_type min                                                    	-delay_type min
+    	-max_paths 1                                                       	-max_paths 1
+    	-sort_by slack                                                     	-sort_by slack
+    Design : circ03                                                        Design : circ03
+    Version: O-2018.06-SP4                                                 Version: O-2018.06-SP4
+    Date   : Sun Jun 23 12:05:40 2019                                      Date   : Sun Jun 23 12:06:39 2019
+    ****************************************                               ****************************************
+      Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)       Startpoint: FF1 (rising edge-triggered flip-flop clocked by CLK)
+      Endpoint: FF2 (rising edge-triggered flip-flop clocked by CLK)         Endpoint: FF2 (rising edge-triggered flip-flop clocked by CLK)
+      Last common pin: clk                                                   Last common pin: clk
+      Path Group: CLK                                                        Path Group: CLK
+      Path Type: min                                                         Path Type: min
+                                                                           
+      Point                                    Incr       Path               Point                                    Incr       Path
+      ---------------------------------------------------------------        ---------------------------------------------------------------
+      clock CLK (rise edge)                   0.000      0.000               clock CLK (rise edge)                   0.000      0.000
+      clock source latency                    0.000      0.000               clock source latency                    0.000      0.000
+      clk (in)                                0.000      0.000 r             clk (in)                                0.000      0.000 r
+      B1/Y (bufx4)                            1.000      1.000 r             B1/Y (bufx4)                            1.000      1.000 r
+      B2/Y (bufx1)                            2.000      3.000 r             B2/Y (bufx1)                            2.000      3.000 r
+      FF1/CK (dffrx1)                         0.000      3.000 r             FF1/CK (dffrx1)                         0.000      3.000 r
+      FF1/Q (dffrx1)                          3.000      6.000 f  <--        FF1/Q (dffrx1) <-                       2.000      5.000 r  <--
+      G1/Y (nand2x1)                          2.000      8.000 r             G1/Y (nand2x1)                          3.000      8.000 f
+      G2/Y (invx1)                            2.000     10.000 f             G2/Y (invx1)                            3.000     11.000 r
+      FF2/D (dffrx1)                          0.000     10.000 f             FF2/D (dffrx1)                          0.000     11.000 r
+      data arrival time                                 10.000               data arrival time                                 11.000
+                                                                           
+      clock CLK (rise edge)                   0.000      0.000               clock CLK (rise edge)                   0.000      0.000
+      clock source latency                    0.000      0.000               clock source latency                    0.000      0.000
+      clk (in)                                0.000      0.000 r             clk (in)                                0.000      0.000 r
+      B1/Y (bufx4)                            1.000      1.000 r             B1/Y (bufx4)                            1.000      1.000 r
+      B3/Y (bufx1)                            2.000      3.000 r             B3/Y (bufx1)                            2.000      3.000 r
+      FF2/CK (dffrx1)                         0.000      3.000 r             FF2/CK (dffrx1)                         0.000      3.000 r
+      clock reconvergence pessimism           0.000      3.000               clock reconvergence pessimism           0.000      3.000
+      library hold time                       0.300      3.300               library hold time                       0.300      3.300
+      data required time                                 3.300               data required time                                 3.300
+      ---------------------------------------------------------------        ---------------------------------------------------------------
+      data required time                                 3.300               data required time                                 3.300
+      data arrival time                                -10.000               data arrival time                                -11.000
+      ---------------------------------------------------------------        ---------------------------------------------------------------
+      slack (MET)                                        6.700               slack (MET)                                        7.700
 
 
 STA Intermediate Topics
@@ -1726,6 +1847,15 @@ STA Intermediate Topics
 
 Circuit External Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*Exterior* is the part of the analysis environment that lays around the circuit
+under analysis. Up to now, the only component of the exterior we modeled was
+the clock generator through ``create_clock``. There is usually more that we
+need to model.
+
+.. figure:: png/design_exterior.png
+
+   Generic exterior of the design under analysis.
 
 Timing Exceptions
 ~~~~~~~~~~~~~~~~~
