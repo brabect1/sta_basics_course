@@ -38,7 +38,7 @@ hold the state and combinational elements define state-dependent functions.
 
    Generic structure of digital circuits.
 
-The higher level of abstraction increases design efficiency that is needed for large scale
+The higher level of abstraction increases engineers' productivity that is needed for large scale
 digital circuits. Few examples of the abstraction in use:
 
 - Binary logic: Thinking in 0s, 1s and occasionally High-Z and unknowns (Xs) simplifies
@@ -61,7 +61,7 @@ digital circuits. Few examples of the abstraction in use:
   a circuit by bracketing each delay with min/max values and then considering the fastest
   and slowest timing paths to construe a conservative, worst case timing model.
   
-  Static timing also simplifies the analysis by separating timing paths at the boundary
+  Static timing also simplifies the analysis by terminating timing paths at the boundary
   of sequential elements, hence assuming only paths going from a source flop to a sink
   flop with only combinational logic in between. This abstracts the overall system timing
   into an analysis of isolated, discrete flop-to-flop paths. 
@@ -76,12 +76,12 @@ Flip-flops
 
 While in discrete design practice there are many types of sequential gates, in digital design we
 restrict ourselves to only two types: D latches and D flip-flops. This stems from the expectation
-of describing the digital circuit in some HDL language and the semantics that can be extracted
+of describing the digital circuit in an HDL language and from the semantics that can be extracted
 from such a description.
 
-*D-type latch* (or simply *D latch*) is a sequential element that has a transparent and stable
-states, controlled by a *gate* signal ``G`` (or inverse *enable*). In the transparent state the latch constantly
-propagates data input ``D`` to data output ``Q``. In the stable state, the data output keeps the last
+*D-type latch* (or simply *D latch*) is a sequential element that has a transparent and a stable
+state, controlled by a *gate* signal ``G`` (or inverse *enable*). In the transparent state the latch constantly
+propagates a data input ``D`` to a data output ``Q``. In the stable state, the data output keeps the last
 data input value before the gate "closed". The following figure shows a sample of D latch operation;
 for simplicity we ignored any propagation delays.
 
@@ -119,7 +119,7 @@ inverted gate signals and combinational paths (incl. loops) to latches in the sa
 *D-type flip-flop* (or just *D flip-flop*, *FF* or simply *flop*) is a sequential element where a data input
 ``D`` copies to a data output ``Q`` on rising edge event of a clock signal ``CK``. Its implementation usually builds
 on a series of D latches, called *master* and *slave*, with inverted gate controls such that every ``CK`` half-period
-only one latch is transparent and the other is stable. Hence the clock transition in the direction of *active edge*
+only one latch is transparent and the other is stable. Hence the clock transition in the direction of the *active edge*
 "pours" data from input to output and "locks" it there until the next clock active edge. FF function (ignoring gate
 delays) and equivalent HDL code is shown below.
 
@@ -182,7 +182,7 @@ Our description here is simplified to let readers comprehend its effects on timi
 Before we discuss it in more detail, think about static timing analysis as method that checks the data
 from a source flop to a sink flop arrives late enough after the hold time, yet early enough before the setup
 time of the sink flop. This check computes the time it takes a signal to go through all gates between
-the source and sink, and this time includes the propagation time of the source flop.
+the source and the sink, and this time includes the propagation time of the source flop.
 
 Under normal conditions, flipping the source flop's output from one logic level to another takes its
 propagation time Tp. When the setup or hold time of the source flop gets violated, that flop may enter
@@ -196,7 +196,7 @@ To help you better imagine what is happening, consider the figure below as a mec
 A ball and a hill (source [Golson2014]_, attributed to [Wakerly87]_). On each side of the hill the ball is
 in a stable state, left or right, logic 0 or logic 1. Flipping a flop is like "kicking" the ball up the hill.
 Stabilizing the flop's input outside its setup/hold window is like kicking hard enough to let the ball pass
-over the hill top and fall on the other side, in the other logic state. While entering the setup/hold window
+over the hill top and land on the other side, in the other logic state. While entering the setup/hold window
 and getting closer to the clock edge, the kick intensity decreases; close to the
 clock edge the kick is so weak that the ball does not even get to the top (i.e. lands back where it was and
 the flop does not flip). Somewhere in between, there will be a kick intensity that makes the ball reach
@@ -204,20 +204,24 @@ the hill top and balance there until it eventually falls on one or the other sid
 of metastability. As you can imagine, the ball may be balancing there anytime long; certainly longer than
 with a "strong", flipping kick.
 
-.. TBD ball on the hill abstraction ... [Golson2014]_ and [Wakerly87]_
+.. figure:: png/metastability_mechanical_analogy.png
+
+   Metastability mechanical analogy ([Golson2014]_ and [Wakerly87]_).
 
 The next figure (source [Golson2014]_, attributed to [ChaneyMolnar73]_) shows how the metastability presents
 itself in practice at the output ``Q`` (and its inverse ``/Q``) of a flop. The blurred area shows the many
 resolutions and the time they took.
 
-.. TBD scope shot ... [Golson2014]_ and [ChaneyMolnar73]_
+.. figure:: png/metastability_flop_output_trace.png
+
+   Oscilloscope trace of a metastable flop outputs ([Golson2014]_ and [ChaneyMolnar73]_).
 
 Now we explain how exactly the metastability and setup/hold times relate to each other. The following figure shows
 a plot where the horizontal axis represents time between changes of the flop's clock and data input; on the left
 the data input change precedes clock event, and vice versa on the right. The vertical axis represents the time it
 takes to flip the flop. Far enough to the left and right, the ``Q`` output flips with a constant delay. The closer
 we get with the data change to the clock event (i.e. to the plot origin at 0), the longer the flip will take, until
-reaching certain bounds where the flip never happens (i.e. the "Data not captured" area in between the vertical
+reaching certain bounds where the flip never happens (i.e. the "Data not captured" region in between the vertical
 asymptotes). Close to the asymptotes the flipping time increases exponentially and as you might have guess the
 asymptotes represent the metastability.
 
@@ -244,9 +248,9 @@ To conclude this short excursion, remember the following:
      our assumptions for static timing analysis).
 
 .. note:: Choosing to represent and constrain flop's flipping function by a set of discrete timing
-   parameters is one of the abstractions digital design takes to simplify its task. As you know the
+   parameters is one of the abstractions the digital design takes to simplify its task. As you know the
    timing parameters are derived conservatively and so the design with no static timing violations
-   shall be on the safe side for guarantee of correct operation.
+   shall be on the safe side that guarantees of correct operation.
 
 Static Timing Analysis
 ----------------------
@@ -260,7 +264,7 @@ Terminology
 
 Understanding terms used in STA is critical for understanding STA itself. We start by explaining the basic
 terms; others will come later as we work through to more advanced timing aspects. While explaining the terminology
-we also build foundation of STA concepts. 
+we also build the foundation of STA concepts. 
 
 Cell, Gate, Net
   *Cell* or *gate* is a combinational or sequential logic element in a circuit. Cells in a circuit are connected
@@ -271,7 +275,7 @@ Timing arc, Cell arc, Net arc
   *cell arcs*, come from timing characterization of that gate function (e.g. see `Metastability`_ for an example of FF
   characterization).
   Net delays, *net arcs*, represent the time it takes a signal to propagate from a driver to a receiver connected
-  by that net. It is a function of signal *slew* and that net's RC parameters (incl. capacitance of receivers on
+  by that net. It is a function of signal *slew* and that net's RC parameters (incl. capacitance of all receivers on
   the net).
   
   *Cell arcs* are associated with input-output and/or input-input pairs of that gate. Input-output pair arcs
@@ -283,14 +287,14 @@ Timing arc, Cell arc, Net arc
   
 .. figure:: png/cell_arcs.png
 
-   Examples of cell arcs of a flip-flop (incl. extra arcs due to asynchronous reset) and a combinational cell.
+   Examples of cell arcs of a flip-flop (incl. extra arcs due to asynchronous reset ``RB``) and a combinational cell.
 
 Signal path
   *Signal path* from one *cell* to another is a unique path through *nets* and other *cells* in a direction of
   logic signal propagation.
 
 Timing path
-  *Timing path* is a set of signal paths going from a *startpoint* to an *endpoint*, see e.g. `TBD`_.
+  *Timing path* is a set of signal paths going from a *startpoint* to an *endpoint*, see figure below.
   The path is oriented in the direction a logic signal can go (i.e. through the inputs to outputs of logic
   elements along the path).
   
@@ -302,11 +306,19 @@ Timing path
   
   For a given pair of *startpoint* and *endpoint* and hence the *timing path*, there can be several *signal paths*
   through which the logic signal can propagate. This is caused by potential branching and recombination of the
-  signal through parallel timing arcs of logic elements along that path. Example `TBD`_
-  
+  signal through parallel timing arcs of logic elements along that path.
+    
   For every *timing path* an STA engine finds the fastest (*early*) and slowest (*late*) propagation delay. *Early*
   and *late paths* can be the same or different signal paths for the given *timing path*.
-  
+
+.. figure:: png/timing_path.png
+
+   An example of a timing path broken into timing arcs.
+
+.. figure:: png/parallel_timing_paths.png
+
+   An example of parallel signal path for a timing path.
+
 Path types
   We can categorize *timing paths* based on different attributes, such as the type of signal that propagates
   along the path or by the *timing check* the path yields, or by the design elements between which the path goes.
@@ -367,8 +379,7 @@ Launch clock, Capture clock
   *Capture clock* is a clock source that samples/*captures* a signal change in the *endpoint* of a *timing path*.
   
   For a given *timing path* the *launch* and *capture clocks* can have the same or different origin. As for the
-  clock active edges that yield data *launching* and *cpaturing*, these may be the same or they may be different
-  (see `TBD Setup checks, Hold checks`_).
+  clock active edges that yield data *launching* and *cpaturing*, these may be the same or they may be different.
 
 .. examples of launch/capture clocks in figures
 
@@ -382,7 +393,7 @@ Path delays
 
 Constraints
   *Timing constraints* is what drives the static timing analysis as they identify bounds within which
-  the circuit timing is deemed correct. Constraints come from two sources: From technology library and
+  the circuit timing is deemed correct. Constraints come from two sources: From a technology library and
   from users.
   
   Technology constraints such as setup/hold time, min pulse width, max capacitance or max transition are
@@ -433,7 +444,7 @@ Data arrival, Data required
   *data arrival* is a sum of five timing arcs, three *net arcs* (td1, td3, td5) and two *cell arcs* (td2, td4).
   
   Data capture is triggered by the *capture clock* and so represented by that clock propagation time (tc2). Reliable
-  capturing is bound by setup/hold times (tc2) [#]_ and so these arcs had to be counted in (subtracted/added) for the
+  capturing is bound by setup/hold times (tc2) [#]_ and so these arcs had to be counted in (subtracted/added) for
   getting the latest/earliest *required* data arrival. Recall the *setup check*; it tests data propagation from one
   clock edge to another and so its *data required* also counts in the clock period. *Hold check* is between the same
   clock edge and so there is no cycle time.
@@ -448,7 +459,7 @@ Data arrival, Data required
   for any combinations of *startpoint* and *endpoint*. You can also generalize the concept on any type of clock
   triggered *timing check* such as recovery/removal or min/max path delay.
   
-.. [#] Notice that the arc direction in `TBD`_ figure indicates, if that arc adds/subtracts (same/opposite direction)
+.. [#] Notice that the arc direction in the figure indicates, if that arc adds/subtracts (same/opposite direction)
    to the overall path delay.
    
 .. [#] You will see later in exercises. There can be multiple parallel *signal paths* between the *startpoint* and
@@ -461,7 +472,7 @@ Slack
   In *timing check* calculations the slack is typically calculated as time of *data required* less time of *data
   arrival* (i.e. ``slack = Trequire - Tarrive``). In case of a hold check, this difference will come out negative when the
   hold constraint is met (see the above figure) . However, by its definition a negative *slack* indicates a violation
-  and so the hold slack is reported as the negated outcome of the previous formula.
+  and so the hold slack is reported as the negated outcome of the slack formula.
 
 Examples
 ........
@@ -485,7 +496,7 @@ required times calculation.*
 
    Exercise 1 circuit.
 
-*Tasks: For the FF1 to FF2 timing path in `TBD`_ figure do:*
+*Tasks: For the FF1 to FF2 timing path in the figure do:*
 
 - *Identify startpoint and endpoint of the FF1 to FF2 timing path.*
 - *Calculate launch and capture clock timing.*
@@ -554,7 +565,7 @@ Exercise 2: Effect of Negedge Clocking
 - *Calculate launch and capture clock timing.*
 - *Calculate setup and hold slack.* 
 
-The only difference to `Exercise 1: Simple FF-to-FF Path` is that FF2 is clocked on a falling edge. This
+The only difference to `Exercise 1: Simple FF-to-FF Path`_ is that FF2 is clocked on a falling edge. This
 affects the *launch time* and *capture time*. For the *setup check*, data is launched on ``FF1/CK`` rise and
 captured on the next ``FF2/CK`` fall. Hence for the launch time ``T=0 ns`` the capture time is ``T=10 ns``.
 
@@ -626,8 +637,8 @@ possibilities of fixing timing violations.*
 - *Contemplate the case when G1/A is constant log.0.*
 
 In previous exercises we used *ideal clocks* that had no clock propagation delays. In most circuits
-the clock signal is heavily loaded and buffers need to inserted in the clock path segments (not to
-violate max capacitance constraint), creating a tree-like structure that we call the *clock tree*.
+the clock signal is heavily loaded and buffers are inserted in the clock path segments (to prevent
+max capacitance violation), creating a tree-like structure that we call the *clock tree*.
 Inserting a clock tree introduces delays into clock paths and makes the clock event arrive to different
 flops at different times. We call this difference the *clock skew*. Large clock skews may be one source
 of timing violations.
@@ -859,7 +870,7 @@ analysis to calculate and consider valid combinations of rise and fall signal pr
 
 The rise/fall timing arcs are related to rise/fall at the output of a cell! The following table
 then summarizes propagation delays of individual paths/segments. An example of calculating the
-segment ``FF1/CK`` to ``FF2/D`` appears in `TBD`_ figure.
+segment ``FF1/CK`` to ``FF2/D`` appears in the figure below.
 
 ========== ======== ============= ================
 Start      End      Change        Path delay [ns]
@@ -871,6 +882,10 @@ clk        FF1/CK   fall (clk)    4
 clk        FF2/CK   rise (clk)    3
 clk        FF2/CK   fall (clk)    4
 ========== ======== ============= ================
+
+.. figure:: png/circ07_data_path_delay.png
+
+   Calculation of ``FF1/Q`` rise/fall propagation through the data path.
 
 For the setup slack we need to consider the *late* data path and *early* clock path; and vice versa
 for the hold slack. On ``FF1/CK`` to ``FF2/D`` the late/early occurs on ``FF1/Q`` rise/fall. On clock
