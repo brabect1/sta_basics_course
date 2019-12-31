@@ -620,7 +620,7 @@ change? The following figure puts the two cases in contrast.
 
    Shows effects of opposite edge triggered flops on setup and hold checks.
 
-Exercise 3: Simple FF-to-FF Parh with Clock Tree
+Exercise 3: Simple FF-to-FF Path with Clock Tree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Objective: Practice setup/hold slack calculation with cells present in clock paths. Contemplate on
@@ -1502,7 +1502,7 @@ like below (yielding setup and hold slack 4.3 and 14.7, respectively)::
     
 
 
-PT Exercise 3: Simple FF-to-FF Parh with Clock Tree
+PT Exercise 3: Simple FF-to-FF Path with Clock Tree
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Objective: Show timing reports for a circuit with a clock tree.*
@@ -1511,7 +1511,7 @@ PT Exercise 3: Simple FF-to-FF Parh with Clock Tree
 
 - *Set up PT session using* ``circ03.v`` *and* ``sample_lib1.db``.
 - *Define clock and a clock period constraint.*
-- *Report results of setup and hold timing checks. Compare with results computed in* `Exercise 3: Simple FF-to-FF Parh with Clock Tree`_.
+- *Report results of setup and hold timing checks. Compare with results computed in* `Exercise 3: Simple FF-to-FF Path with Clock Tree`_.
 
 The analysis procedure is as in the preceding examples. However, we do extend
 ``report_timing`` options to get a complete clock path listing.
