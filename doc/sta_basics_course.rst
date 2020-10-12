@@ -1001,7 +1001,7 @@ Library Attributes
 The common library-level attributes are:
 
 - General library type attributes (e.g. ``technology``, ``delay_model``).
-- Units attributes: Define units associated with numeric literals.
+- Units attributes: Define units associated with numeric literals. The same units then apply for SDC constraints.
 
   ::
   
