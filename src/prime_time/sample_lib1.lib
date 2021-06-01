@@ -295,7 +295,7 @@ library(sample_lib1) {
                 related_pin: "CK";
                 timing_type: min_pulse_width;
                 when: "RB";
-                sdf_cond: "RB == 1'b0";
+                sdf_cond: "RB == 1'b1";
                 rise_constraint(scalar) { values("1.0"); }
                 fall_constraint(scalar) { values("1.0"); }
             }
@@ -386,7 +386,7 @@ library(sample_lib1) {
                 related_pin: "CKN";
                 timing_type: min_pulse_width;
                 when: "RB";
-                sdf_cond: "RB == 1'b0";
+                sdf_cond: "RB == 1'b1";
                 rise_constraint(scalar) { values("1.0"); }
                 fall_constraint(scalar) { values("1.0"); }
             }
