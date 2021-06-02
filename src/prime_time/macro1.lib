@@ -1,0 +1,137 @@
+/*      
+* Copyright 2021 Tomas Brabec
+* 
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+* 
+*     http://www.apache.org/licenses/LICENSE-2.0
+*     
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+library(macro1_lib) {
+    /* general attributes */
+    technology (cmos);
+    delay_model: table_lookup;
+
+    /* units attributes*/
+    time_unit: "1ns";
+    voltage_unit: "1V";
+    current_unit: "1mA";
+    pulling_resistance_unit: "1ohm";
+    leakage_power_unit: "1nW";
+    capacitive_load_unit (1,pf);
+
+    /* thresholds */
+    slew_upper_threshold_pct_rise: 80;
+    slew_lower_threshold_pct_rise: 20;
+    slew_upper_threshold_pct_fall: 80;
+    slew_lower_threshold_pct_fall: 20;
+    input_threshold_pct_rise: 50;
+    input_threshold_pct_fall: 50;
+    output_threshold_pct_rise: 50;
+    output_threshold_pct_fall: 50;
+
+    /* process attributes */
+    nom_process: 1.0;
+    nom_voltage: 1.5;
+    nom_temperature: 25.0;
+    operating_conditions (tc_1p5v_25c) {
+        process: 1;
+        voltage: 1.5;
+        temperature: 25;
+    }
+    default_operating_conditions : tc_1p5v_25c;
+
+    /* default attributes */
+    default_input_pin_cap: 1.0;
+    default_inout_pin_cap: 1.0;
+    default_output_pin_cap: 1.0;
+    default_fanout_load: 1.0;
+    default_max_transition: 1.0;
+    default_cell_leakage_power: 0.0;
+    default_leakage_power_density: 0.0;
+
+    /* declare user attributes */
+    define(CELL_DESCR,cell,string);
+
+    /* ---------------- *
+     * Macro cell
+     * ---------------- */
+    cell(macro1) {
+        CELL_DESCR: "Hard macro cell.";
+        area: 10.0;
+        is_macro_cell: true;
+        interface_timing: true;
+        cell_leakage_power: 0.5;
+        pin(A) {
+            direction: input;
+            capacitance: 0.001;
+			timing () {
+				related_pin        : "C" ;
+				timing_type        : non_seq_setup_falling ;
+				fall_constraint(scalar) { values("0.0"); }
+			}
+        }
+        pin(B) {
+            direction: input;
+            capacitance: 0.001;
+			timing () {
+				related_pin        : "A" ;
+				timing_type        : non_seq_hold_falling ;
+				fall_constraint(scalar) { values("2.3"); }
+			}
+			timing () {
+				related_pin        : "A" ;
+				timing_type        : non_seq_setup_rising ;
+				rise_constraint(scalar) { values("1.7"); }
+			}
+        }
+        pin(C) {
+            direction: input;
+            capacitance: 0.001;
+			timing () {
+				related_pin        : "A" ;
+				timing_type        : non_seq_setup_rising ;
+				rise_constraint(scalar) { values("1.7"); }
+			}
+        }
+        pin(Y) {
+            direction: output;
+            max_capacitance: 0.05;
+			timing () {
+				related_pin        : "A" ;
+				timing_type        : combinational ;
+				timing_sense       : positive_unate ;
+                cell_fall(scalar) { values("2.0"); }
+                cell_rise(scalar) { values("2.0"); }
+				fall_transition(scalar) { values("0.3"); }
+				rise_transition(scalar) { values("0.3"); }
+			}
+			timing () {
+				related_pin        : "B" ;
+				timing_type        : combinational ;
+				timing_sense       : positive_unate ;
+                cell_fall(scalar) { values("3.0"); }
+                cell_rise(scalar) { values("3.0"); }
+				fall_transition(scalar) { values("0.3"); }
+				rise_transition(scalar) { values("0.3"); }
+			}
+			timing () {
+				related_pin        : "C" ;
+				timing_type        : combinational ;
+				timing_sense       : positive_unate ;
+                cell_fall(scalar) { values("3.0"); }
+                cell_rise(scalar) { values("3.0"); }
+				fall_transition(scalar) { values("0.3"); }
+				rise_transition(scalar) { values("0.3"); }
+			}
+        }
+    }
+
+}
