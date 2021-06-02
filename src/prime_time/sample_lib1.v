@@ -115,7 +115,7 @@ module nor2x1( A, B, Y );
 input A, B;
 output Y;
 
-nand u(Y, A, B);
+nor u(Y, A, B);
 
 specify
     specparam td = 0.0;
