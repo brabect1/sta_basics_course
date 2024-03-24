@@ -1,1 +1,0 @@
-sta_basics_course.rst
