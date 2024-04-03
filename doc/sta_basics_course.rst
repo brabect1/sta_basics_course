@@ -1921,6 +1921,100 @@ PVT corner
    max temp down the delay decreases up to a certain ponint wherefrom further temperature decrease cause the
    delay to rise again.
 
+STA Advanced Topics
+...................
+
+This section provide references to some advanced STA aspects that you are most likely
+to encounter in practice. The list of topics is certainly not complete and every design/project
+brings surprises even for seasoned STA engineers.
+
+Clock-Domain Crossing (CDC)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+CDC is normally focus at RTL design. It, though, requires adequate attention in other areas, incl. timing
+analysis and place&route. Recommendations for constraining CDC paths is discussed in a separate article/gist
+`CDC Timing Constraints <https://gist.github.com/brabect1/7695ead3d79be47576890bbcd61fe426>`_.
+
+On-Chip Variation (OCV) and Timing Derating
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Timing libraries account for an exact process/voltage/temperature conditions. Similarly, SDC constraints
+may do. However, the real operating condition will certainly differ from the one used for STA (e.g. voltage
+level will fluctuate, voltage level will drop over power distribution network and in response to current
+draw peaks, manufacturing process fluctuates in a fab, parameters change wafer to wafer, etc.).
+
+The implied variation of operating conditions has a global and a local component. The global variation is
+countered running STA analysis at the corner conditions that form a bounding "box" of where the real silicon
+is to operate. Similarly, users normally express SDC constraints as min/max pairs (e.g. input/output delays
+and transitions, output loads). Despite accounting for worst case and best case shifts in operating conditions,
+every chip will suffer from local variations (a.k.a. *on-chip variation* or *OCV*), meaning that some gates
+will be little faster, some little slower, some will see slightly higher temperature, or slightly lower voltage.
+
+To account for the local variation, designers add extra margin to make sure the performance of the chip stays
+on the safe side. This usually comes as scaling (or de-rating) the timing from a gate library to yield more
+pessimistic timing. Hence the term *timing derating*.
+
+The command that introduces timing derating (a.k.a. *timing derate*) is ``set_timing_derate``. The following
+example sets a +/-10% derating, such that slow paths get 10% slower and fast paths get 10% faster.
+
+::
+
+    pt_shell> set_timing_derate -late  1.1
+    pt_shell> set_timing_derate -early 0.9
+
+For more details refer to a separate article/gist `OCV and Timing Derating <https://gist.github.com/brabect1/6281f4cf9fb53002fb17f15fa3bf4f62>`_.
+
+Advnaced OCV (AOCV) and Statistical OCV (SOCV)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+AOCV and SOCV are more elaborate mechanism to model on-chip variation for sub-micron technologies.
+The general idea is that local **process variations** (!) tend to average across a chip. That is,
+assuming all gates are 10% slower or faster is an extreme with likelihood close to zero. Hence while
+a chance for one gate getting slower/faster is meaningful, chance in a 10 gate-long timing path of
+all gates all getting slower/faster is small (and further decreases with the timing path length).
+
+Hence using flat OCV through ``set_timing_derate`` becomes too pessimistic and fails to meaningfully
+model process variation of finer technology nodes (e.g. 65nm and below).
+
+.. note:: Using flat margins with more advanced nodes then leads to either false timing violations
+   or to overdesigning. Either is sub-optimal as there is already enough conservatisms in the digital
+   design methodology.
+
+For more details refer to a separate article/gist `OCV and Timing Derating <https://gist.github.com/brabect1/6281f4cf9fb53002fb17f15fa3bf4f62>`_.
+
+Data-to-Data Checks
+~~~~~~~~~~~~~~~~~~~
+
+STA's primary function is to check a data signal timing to a clock signal timing, such as setup and hold
+constraints that require the data signal to remain stable around the active clock edge. In certain cases,
+we need to constrain the data change not to a clock event but another data signal event. These are called
+*data-to-data checks*. You can find them frequently in hard macros with asynchronous interfaces; but also
+in flip-flops with both asynchronous set and reset to enforce priority of one over the other.
+
+STA provides mechanism to express and verify such dependencies. The mechanisms include constraint
+commands, ``set_data_check``, and specific library timing arcs. For examples see the article/gist
+`STA Data-to-Data Checks <https://gist.github.com/brabect1/3b12ad2e90416fc9b6692ef3a242f23d>`_.
+
+.. note:: While STA generally provides mechanisms for data-to-data checks, most physical implementation
+   tools (i.e. synthesis, place&route) ignore them. This is quite unfortunate as users can't use SDC
+   constraints to make the implementation tools detect and fix data-to-data timing violations. Hence
+   using data-to-data STA mechanisms only helps to detect timing problems after physical implementation
+   is over.
+
+Duty Cycle Jitter
+~~~~~~~~~~~~~~~~~
+
+Many chip designs come with clock duty cycle specification in some range, such as 50% +/-10%. Options
+of modeling this duty cycle variation is discussed in a separate article/gist
+`Constraining Duty Cycle Jitter <https://gist.github.com/brabect1/82505e8af2f9732bb6750678759af0b3>`_.
+
+Asynchronous Counters
+~~~~~~~~~~~~~~~~~~~~~
+
+This is a real niche topic as truly asynchronous counters appear sporadically in digital designs.
+There are occasions, though, where they do and their timing may need to be analyzed. In that case
+see details in a separate article/gist `STA Constraints of Asynchronous Counters <https://gist.github.com/brabect1/d0463621efd2a8318695d8320ac17807>`_.
+
 Summary
 -------
 
