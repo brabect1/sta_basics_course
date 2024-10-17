@@ -324,7 +324,7 @@ Path types
   along the path or by the *timing check* the path yields, or by the design elements between which the path goes.
   You may encounter the following categorizations:
   
-  - By signal type or timing check: *Data path*, *clock path*, *clock-gating path*, *asynchornous path*.
+  - By signal type or timing check: *Data path*, *clock path*, *clock-gating path*, *asynchronous path*.
   
     - *Data path* ends at a synchronous data input of a sequential element. Data paths are used for *setup/hold
       checks* or equivalent *timing checks*.
@@ -335,7 +335,7 @@ Path types
     - *Clock-gating path* ends at the clock gating *cell* and is considered for clock gating setup and
       hold checks.
       
-    - *Asnchronous path* ends at a flop asynchronous input such as set or clear/reset.
+    - *Asynchronous path* ends at a flop asynchronous input such as set or clear/reset.
     
   - By path points: *Input to register*, *register to register*, *register to output*, *input to output*.
     
@@ -379,7 +379,7 @@ Launch clock, Capture clock
   *Capture clock* is a clock source that samples/*captures* a signal change in the *endpoint* of a *timing path*.
   
   For a given *timing path* the *launch* and *capture clocks* can have the same or different origin. As for the
-  clock active edges that yield data *launching* and *cpaturing*, these may be the same or they may be different.
+  clock active edges that yield data *launching* and *capturing*, these may be the same or they may be different.
 
 .. examples of launch/capture clocks in figures
 
@@ -464,7 +464,7 @@ Data arrival, Data required
    
 .. [#] You will see later in exercises. There can be multiple parallel *signal paths* between the *startpoint* and
    *endpoint*, each with different delays. *Cell arcs* delays may change with polarity of the signal. There can be
-   clock uncertanties, signal slew variations, etc.
+   clock uncertainties, signal slew variations, etc.
   
 Slack
   *Slack* is the amount of time by which a violation of a *constraint* is avoided.
@@ -700,7 +700,7 @@ propagate to ``FF2/D``. From the timing perspective the path would become consta
 Exercise 4: Parallel FF-to-FF Paths
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*Objective: Practice timing analysis in cases when there are multiple paths from a startpoint to an ednpoint.
+*Objective: Practice timing analysis in cases when there are multiple paths from a startpoint to an endpoint.
 Contemplate on possibilities of fixing timing violations.*
 
 .. figure:: png/circ04.png
@@ -965,7 +965,7 @@ The Liberty syntax then looks like follows::
         complex_attribute ( my_complex_attr_value );
         
         some_group (my_group_b) {
-            /* lower level attribbutes */
+            /* lower level attributes */
             /* lower level groups */
         }
         
@@ -1265,12 +1265,12 @@ Steps 3 to 5 will be practiced  during exercises. Steps 1 and 2 in PrimeTime loo
 
 .. note:: Productivity tip: Starting the PrimeTime and getting a license takes some time. Rather than leaving
    the session and starting the tool again, you can reset the configuration by unloading the design and the
-   techonology library, then loading the new ones::
+   technology library, then loading the new ones::
    
        # unload the design
        remove_design [current_design]
        
-       # unload the librarym, where <libname> is the library name, usually
+       # unload the library, where <libname> is the library name, usually
        # the base name of the library file
        remove_library <libname>
 
@@ -1613,8 +1613,8 @@ be as follows:
        pt_shell> report_timing -from FF1/CK -to FF2/D
        ...
 
-3. Specifying an enpoint only would again yield the only timing path in the
-   design, should the enpoint be specified correctly. Notice the assignment
+3. Specifying an endpoint only would again yield the only timing path in the
+   design, should the endpoint be specified correctly. Notice the assignment
    asks for using ``FF2/Q`` as the endpoint, but a flop output cannot be an
    endpoint of a timing path. So you should see the STA tool complain:: 
 
@@ -1717,7 +1717,7 @@ interest are these two:
 
   This setting defaults to 1.
 
-  The ``maxpath`` has one gotcha. Unless overriden, it sets the ``-slack_lesser_than``
+  The ``maxpath`` has one gotcha. Unless overridden, it sets the ``-slack_lesser_than``
   to 0, meaning that only violating paths get reported by default. In our examples
   you thus need to use some large enough slack limit, e.g. ``-slack_lesser_than 100``.
 
@@ -1887,7 +1887,7 @@ Clock tree
   skew.
   
   In theory we will get the best timing results with a fully balanced clock tree where there is
-  no clock skew. This is hardly possible in practice and hence the term *ballancing* means minimizing
+  no clock skew. This is hardly possible in practice and hence the term *balancing* means minimizing
   the clock skew.
   
   In practice and especially for large circuits, the ideal "no skew" case is not desirable as it would
@@ -1918,7 +1918,7 @@ PVT corner
   we really need to consider only the min/max values of each parameter. That is, *corners* of the PVT cube.
 
 .. [#] One notable exception is temperature, where there can be a *temperature inversion*, where going from
-   max temp down the delay decreases up to a certain ponint wherefrom further temperature decrease cause the
+   max temp down the delay decreases up to a certain point where from further temperature decrease cause the
    delay to rise again.
 
 STA Advanced Topics
@@ -1964,7 +1964,7 @@ example sets a +/-10% derating, such that slow paths get 10% slower and fast pat
 
 For more details refer to a separate article/gist `OCV and Timing Derating <https://gist.github.com/brabect1/6281f4cf9fb53002fb17f15fa3bf4f62>`_.
 
-Advnaced OCV (AOCV) and Statistical OCV (SOCV)
+Advanced OCV (AOCV) and Statistical OCV (SOCV)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 AOCV and SOCV are more elaborate mechanism to model on-chip variation for sub-micron technologies.
@@ -2045,7 +2045,7 @@ References
 .. - Conclusions:
 ..   - Design your 2FF synchronizer to maximize its MTBF (close to each other, minimize load capacitance of
 ..     the 1st FF)
-..   - Relaxing synchonizer clock period exxponentially improves MTBF
+..   - Relaxing synchonizer clock period exponentially improves MTBF
 
 .. [Wakerly87] Wakerly, John. *Designer’s Guide to Synchronizers and Metastability, Part I.* Microprocessor Report 1, no. 1 (1987): 4-8.
 
