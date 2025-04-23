@@ -833,14 +833,14 @@ After identifying the worst case conditions we obtain the following slacks::
     G1/A                2       25                          G2/A                2       15
     FF2/D               0       25                          FF2/D               0       15
     data arrive                 25                          data arrive                 15
-    
-    clkb (rise)         0       30   <-- capture time -->   clkb (rise)         0        7.5
-    FF2/CK              0       30                          FF2/CK              0        7.5
-    FF2 setup          -0.7     29.3                        FF2 hold            0.3      7.8
-    data required               29.3                        data required                7.8
-    
-    slack (required - arrive)    4.3 > 0                    slack (required - arrive)   -7.2 < 0
-    => setup check passed                                   => hold check passed
+
+    clkb (rise)         0       22.5 <-- capture time -->   clkb (rise)         0        7.5
+    FF2/CK              0       22.5                        FF2/CK              0        7.5
+    FF2 setup          -0.7     21.8                        FF2 hold            0.3      7.8
+    data required               21.8                        data required                7.8
+
+    slack (required - arrive)    -3.2 < 0                   slack (required - arrive)   -7.2 < 0
+    => setup check failed                                   => hold check passed
 
 Obviously the multi-clock exercise is about expanding the clock waveforms. Below there are two
 more examples with clock periods of 10 ns and 30 ns and different phase alignment.
